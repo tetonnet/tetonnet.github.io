@@ -3,34 +3,254 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>tetonnet</title>
+<title>tetonnet | Temu風パロディ</title>
 <style>
-  body { margin: 0; background: #fff; color: #000; font-family: sans-serif; line-height: 1.7; }
-  main { max-width: 640px; margin: 0 auto; padding: 48px 20px; }
-  h1 { font-size: 28px; margin: 0 0 8px; }
-  h2 { font-size: 18px; margin: 32px 0 8px; border-bottom: 2px solid #000; padding-bottom: 4px; }
-  p, li { font-size: 15px; }
-  a { color: #000; }
-  footer { margin-top: 48px; font-size: 12px; color: #555; }
+* { box-sizing: border-box;}
+body { margin: 0; background: #f5f5f5; color: #222; font-family: sans-serif;}
+a { color: inherit;}
+.topbar { background: #000; color: #fff; text-align: center; font-size: 12px; padding: 6px 8px; letter-spacing:.05em;}
+.topbar b { color: #fb7701;}
+header { background: #fb7701; color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;}
+.logo { font-size: 30px; font-weight: 900; font-style: italic; letter-spacing: -.02em; line-height: 1;}
+.logo small { display: block; font-size: 10px; font-weight: normal; font-style: normal; letter-spacing:.2em;}
+.search { flex: 1; min-width: 180px; display: flex;}
+.search input { flex: 1; border: none; border-radius: 20px 0 0 20px; padding: 10px 16px; font-size: 14px;}
+.search button { border: none; background: #000; color: #fff; border-radius: 0 20px 20px 0; padding: 0 18px; font-size: 14px; cursor: pointer;}
+.hnav { font-size: 13px; white-space: nowrap;}
+nav { background: #fff; border-bottom: 1px solid #e5e5e5; padding: 8px 16px; display: flex; gap: 18px; font-size: 13px; overflow-x: auto;}
+nav a { text-decoration: none; white-space: nowrap;}
+nav a.hot { color: #e4002b; font-weight: bold;}
+#couponBar { display: none; background: #fff3e0; border-bottom: 2px dashed #fb7701; padding: 8px 16px; font-size: 13px; text-align: center;}
+.flash { background: linear-gradient(90deg, #e4002b, #fb7701); color: #fff; margin: 14px auto 0; max-width: 1080px; border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;}
+.flash.big { font-size: 20px; font-weight: 900;}
+.flash.timer { background: #000; padding: 4px 10px; border-radius: 4px; font-variant-numeric: tabular-nums;}
+main { max-width: 1080px; margin: 0 auto; padding: 14px 12px 40px;}
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px;}
+.card { background: #fff; border-radius: 8px; overflow: hidden; text-decoration: none; display: block;}
+.card.vis { height: 130px; display: flex; align-items: center; justify-content: center; font-size: 58px; font-weight: 900; color: #fff;}
+.card.body { padding: 10px 12px 14px;}
+.card.name { font-size: 14px; font-weight: bold; margin-bottom: 4px;}
+.card.desc { font-size: 12px; color: #555; min-height: 32px;}
+.price { margin-top: 6px;}
+.price.now { color: #e4002b; font-size: 20px; font-weight: 900;}
+.price.was { color: #999; text-decoration: line-through; font-size: 12px; margin-left: 6px;}
+.off { background: #e4002b; color: #fff; font-size: 11px; font-weight: bold; border-radius: 3px; padding: 1px 5px; margin-left: 6px; vertical-align: middle;}
+.meta { font-size: 11px; color: #888; margin-top: 4px;}
+.stars { color: #fb7701;}
+.badge { display: inline-block; background: #fb7701; color: #fff; font-size: 10px; border-radius: 3px; padding: 1px 5px; margin-right: 4px;}
+section.block { background: #fff; border-radius: 8px; padding: 18px; margin-top: 14px;}
+section.block h2 { margin: 0 0 10px; font-size: 18px;}
+section.block p, section.block li { font-size: 14px; line-height: 1.8;}
+footer { text-align: center; font-size: 11px; color: #888; padding: 24px 12px 40px; line-height: 1.9;}
+/* ルーレット */
+#overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px;}
+#overlay.hidden { display: none;}
+.modal { background: #fff; border-radius: 14px; max-width: 380px; width: 100%; text-align: center; padding: 20px 18px 24px; border-top: 8px solid #fb7701;}
+.modal h2 { margin: 2px 0 4px; font-size: 20px;}
+.modal.sub { font-size: 12px; color: #666; margin-bottom: 10px;}
+.wheelwrap { position: relative; width: 260px; height: 260px; margin: 8px auto;}
+.pointer { position: absolute; left: 50%; top: -8px; transform: translateX(-50%); width: 0; height: 0; border-left: 13px solid transparent; border-right: 13px solid transparent; border-top: 22px solid #e4002b; z-index: 3;}
+#wheel { width: 260px; height: 260px; border-radius: 50%; border: 8px solid #fb7701; position: relative;
+background: conic-gradient(#ffe082 0 45deg, #fff 45deg 90deg, #ffccbc 90deg 135deg, #fff 135deg 180deg, #ffe082 180deg 225deg, #fff 225deg 270deg, #ffccbc 270deg 315deg, #fff 315deg 360deg);
+transition: transform 4.6s cubic-bezier(.12,.8,.08,1);}
+#wheel span { position: absolute; left: 50%; top: 50%; font-size: 11px; font-weight: bold; width: 76px; margin-left: -38px; text-align: center;}
+.hub { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); background: #fb7701; color: #fff; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; z-index: 2;}
+#result { display: none;}
+#result.win { font-size: 22px; font-weight: 900; color: #e4002b;}
+.code { border: 2px dashed #fb7701; background: #fff8e1; padding: 10px; font-size: 18px; font-weight: 900; letter-spacing:.08em; margin: 10px 0 4px;}
+.useless { font-size: 11px; color: #888;}
+.getbtn { margin-top: 14px; background: #fb7701; color: #fff; border: none; font-size: 16px; font-weight: bold; padding: 12px 28px; border-radius: 24px; cursor: pointer; width: 100%;}
+.getbtn:disabled { background: #ccc; cursor: default;}
 </style>
 </head>
 <body>
+
+<div class="topbar">ほぼ全品 <b>¥0</b> ／ 送料無料（そもそも何も売っていません）／ クーポン乱発中</div>
+
+<header>
+<div class="logo">tetonnet<small>TEMU風ショッピング（風）</small></div>
+<form class="search" onsubmit="return false;">
+<input type="text" placeholder="tetonnet 自己紹介 グラフメモ チェス" aria-label="検索（飾り）">
+<button type="submit">検索</button>
+</form>
+<div class="hnav">注文（0件）｜ カート（0点）</div>
+</header>
+
+<nav>
+<a class="hot" href="#flash">フラッシュセール</a>
+<a href="#about">自己紹介</a>
+<a href="#works">作ったもの</a>
+<a href="#chess">チェス</a>
+<a href="#music">プレイリスト</a>
+<a href="#" id="againLink">ルーレット（再）</a>
+</nav>
+
+<div id="couponBar">🎟 マイクーポン：<b>2万円引きクーポン ×1</b> を所持しています（使用先：世界のどこにもありません）</div>
+
 <main>
-  <h1>tetonnet</h1>
-  <p>個人サイト。作ったものを置いていく場所です。</p>
+<div class="flash" id="flash">
+<div class="big">フラッシュセール：自己紹介 -100%</div>
+<div>終了まで <span class="timer" id="timer">--:--:--</span></div>
+</div>
 
-  <h2>作ったもの</h2>
-  <ul>
-    <li><a href="https://github.com/tetonnet/graph-memo">グラフメモ</a> — 生成元から矢印で枝を生やしてアイディアを発展させる、グラフ構造のメモアプリ（Android）</li>
-    <li>タスク通知 — 決めた時間に決めた文言で通知するだけのタスク管理アプリ（Android）</li>
-  </ul>
+<div class="grid" style="margin-top:12px;">
+<a class="card" href="#about">
+<div class="vis" style="background:#222;">t</div>
+<div class="body">
+<div class="name">tetonnet 自己紹介ページ</div>
+<div class="desc">チェスと海外ヒップホップとアプリ作りが好きな人。在庫は本人のみ。</div>
+<div class="price"><span class="now">¥0</span><span class="was">¥20,000</span><span class="off">-100%</span></div>
+<div class="meta"><span class="stars">★★★★★</span> 5.0 | 販売数 1 | <span class="badge">残り1点</span></div>
+</div>
+</a>
 
-  <h2>リンク</h2>
-  <ul>
-    <li><a href="https://github.com/tetonnet">GitHub: tetonnet</a></li>
-  </ul>
+<a class="card" href="https://github.com/tetonnet/graph-memo">
+<div class="vis" style="background:#4a90d9;">◯→◯</div>
+<div class="body">
+<div class="name">グラフメモ（Androidアプリ）</div>
+<div class="desc">生成元から矢印で枝を生やしてアイディアを発展させる、グラフ構造のメモ。2つの丸を「結合」できる。権限ゼロ。</div>
+<div class="price"><span class="now">¥0</span><span class="was">¥9,800</span><span class="off">無料</span></div>
+<div class="meta"><span class="stars">★★★★★</span> 5.0 | GitHubで公開中</div>
+</div>
+</a>
 
-  <footer>© tetonnet</footer>
+<div class="card">
+<div class="vis" style="background:#000;">!</div>
+<div class="body">
+<div class="name">タスク通知（Androidアプリ）</div>
+<div class="desc">決めた時間に、決めた文言で通知するだけのタスク管理。それ以外は何もできない。それがいい。</div>
+<div class="price"><span class="now">¥0</span><span class="was">¥4,800</span><span class="off">無料</span></div>
+<div class="meta"><span class="stars">★★★★★</span> 5.0 | 広告なし・通信なし</div>
+</div>
+</div>
+
+<a class="card" href="https://www.chess.com/member/tetonnet" id="chess">
+<div class="vis" style="background:#769656;">♞</div>
+<div class="body">
+<div class="name">Chess.com アカウント @tetonnet</div>
+<div class="desc">チェスの対局アカウント。ナイトの動きだけは自信がある（他は保証しない）。</div>
+<div class="price"><span class="now">対局無料</span><span class="off">募集中</span></div>
+<div class="meta"><span class="stars">★★★★☆</span> | chess.comで開く</div>
+</div>
+</a>
+
+<a class="card" href="https://open.spotify.com/playlist/3uPl36TSfXTOXwJb2IIIZj" id="musicCard">
+<div class="vis" style="background:#1db954;">♪</div>
+<div class="body">
+<div class="name">Spotify プレイリスト</div>
+<div class="desc">お気に入りを詰めたプレイリスト。下のプレイヤーからそのまま再生できます。</div>
+<div class="price"><span class="now">¥0</span><span class="was">¥1,480/月</span><span class="off">試聴可</span></div>
+<div class="meta"><span class="stars">★★★★★</span> 5.0 | Spotifyで開く</div>
+</div>
+</a>
+
+<div class="card">
+<div class="vis" style="background:#e4002b;">-¥</div>
+<div class="body">
+<div class="name">2万円引きクーポン</div>
+<div class="desc">サイトを開くとルーレットで必ず（ほぼ必ず）もらえるクーポン。もらえるだけで、世界のどこでも使えません。</div>
+<div class="price"><span class="now">-¥20,000</span><span class="off">使用不可</span></div>
+<div class="meta">有効期限：無期限（使う場所がないため）</div>
+</div>
+</div>
+</div>
+
+<section class="block" id="about">
+<h2>自己紹介（商品説明）</h2>
+<p>
+tetonnet です。チェスと海外ヒップホップが好きで、休みの日はAndroidアプリを作ったりしています。
+ものごとは調べてから決めるタイプ。計画はきっちり立てる派。お茶が好き。
+このサイトは「作ったものを置く場所」として、Temu風の見た目でふざけて作ったものです。
+</p>
+</section>
+
+<section class="block" id="works">
+<h2>作ったもの（商品一覧の続き）</h2>
+<ul>
+<li><a href="https://github.com/tetonnet/graph-memo">グラフメモ</a> — 生成元・接続・結合でアイディアを育てるグラフメモアプリ</li>
+<li>タスク通知 — 決めた時間に決めた文言で通知するだけのミニマルなタスク管理アプリ</li>
+</ul>
+</section>
+
+<section class="block" id="music">
+<h2>プレイリスト（おすすめ商品）</h2>
+<iframe title="Spotify playlist" style="border-radius:8px" src="https://open.spotify.com/embed/playlist/3uPl36TSfXTOXwJb2IIIZj?utm_source=generator" width="100%" height="352" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+</section>
 </main>
+
+<footer>
+© tetonnet<br>
+※このサイトはTemu風のパロディです。本物のTemu（PDD Holdings）とは一切関係ありません。商品は1つも売っていませんし、クーポンは何にも使えません。
+</footer>
+
+<div id="overlay">
+<div class="modal">
+<h2>🎰 謎のルーレット</h2>
+<div class="sub">開いた瞬間に始まる、断る権利のないルーレット</div>
+<div class="wheelwrap">
+<div class="pointer"></div>
+<div id="wheel"></div>
+<div class="hub">GO!</div>
+</div>
+<div id="status">回転中…</div>
+<div id="result">
+<div class="win">🎉 2万円引きクーポン GET!</div>
+<div class="code">TETONNET-20000</div>
+<div class="useless">※このクーポンは、当サイトを含む世界のどこでも使えません。もらえた、という事実だけが残ります。</div>
+</div>
+<button class="getbtn" id="getBtn" disabled>回転中…</button>
+</div>
+</div>
+
+<script>
+// フラッシュセールのカウントダウン（今日の終わりまで）
+function tick() {
+var now = new Date(); var end = new Date(now); end.setHours(23,59,59,999);
+var s = Math.max(0, Math.floor((end - now) / 1000));
+var h = String(Math.floor(s/3600)).padStart(2,'0'), m = String(Math.floor(s%3600/60)).padStart(2,'0'), ss = String(s%60).padStart(2,'0');
+document.getElementById('timer').textContent = h + ':' + m + ':' + ss;
+}
+tick(); setInterval(tick, 1000);
+
+// ルーレット
+var labels = ['2万円引き','100円引き','ハズレ','50%OFF','送料無料','ハズレ','1000円引き','ポイント2倍'];
+var wheel = document.getElementById('wheel');
+labels.forEach(function(t, i) {
+var sp = document.createElement('span');
+sp.textContent = t;
+sp.style.transform = 'rotate(' + (i*45+22.5) + 'deg) translateY(-104px)';
+sp.style.transformOrigin = 'center center';
+wheel.appendChild(sp);
+});
+var overlay = document.getElementById('overlay');
+var getBtn = document.getElementById('getBtn');
+function spin() {
+document.getElementById('result').style.display = 'none';
+document.getElementById('status').style.display = 'block';
+document.getElementById('status').textContent = '回転中…';
+getBtn.disabled = true; getBtn.textContent = '回転中…';
+wheel.style.transition = 'none'; wheel.style.transform = 'rotate(0deg)';
+// 2万円引き（先頭セグメント）がポインタ位置に来る角度で必ず止まる
+requestAnimationFrame(function() { requestAnimationFrame(function() {
+wheel.style.transition = 'transform 4.6s cubic-bezier(.12,.8,.08,1)';
+wheel.style.transform = 'rotate(' + (360*5 + 337.5) + 'deg)';
+});});
+setTimeout(function() {
+document.getElementById('status').style.display = 'none';
+document.getElementById('result').style.display = 'block';
+getBtn.disabled = false; getBtn.textContent = 'クーポンを受け取る';
+}, 4900);
+}
+getBtn.addEventListener('click', function() {
+overlay.classList.add('hidden');
+document.getElementById('couponBar').style.display = 'block';
+});
+document.getElementById('againLink').addEventListener('click', function(e) {
+e.preventDefault();
+overlay.classList.remove('hidden');
+spin();
+});
+spin();
+</script>
 </body>
 </html>
